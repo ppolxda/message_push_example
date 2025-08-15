@@ -44,7 +44,7 @@ public:
 class EventManager
 {
 public:
-    EventManager() : events() {}
+    EventManager(const int32_t thread_interval = 1) : events(), running(false), thread_interval(thread_interval) {}
     ~EventManager()
     {
         stop();
@@ -68,6 +68,7 @@ public:
         running.store(false);
         thread.join();
     }
+    bool emptyQueue() { return queue.emptyQueue(); }
 
     void addCallback(std::shared_ptr<EventMessage> cb)
     {
@@ -135,7 +136,10 @@ private:
         {
             try
             {
-                queue.wait();
+                bool hasEvent = queue.waitFor(std::chrono::milliseconds(1));
+                if (!hasEvent)
+                    continue;
+
                 queue.process();
             }
             catch (const std::exception &e)
@@ -150,6 +154,7 @@ private:
     std::thread thread;
     std::atomic<bool> running;
     std::vector<std::shared_ptr<EventMessage>> events;
+    const int32_t thread_interval;
 };
 
 // // 测试

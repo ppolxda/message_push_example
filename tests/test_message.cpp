@@ -20,10 +20,16 @@ TEST(EventManagerTest, MatchStartAndEndCallbacks)
     manager.addCallback(msg);
     manager.start();
     manager.emit(EventType::MatchStart);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    while (!manager.emptyQueue())
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     EXPECT_TRUE(msg->matchStartCalled);
     manager.emit(EventType::MatchEnd);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    while (!manager.emptyQueue())
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     EXPECT_TRUE(msg->matchEndCalled);
     manager.stop();
 }

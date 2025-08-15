@@ -1,7 +1,17 @@
 {
   "dependencies": [
     "eventpp",
+    "librdkafka",
     "nlohmann-json",
-    "librdkafka"
+    {
+      "name": "opencv4",
+      "features": [
+        "cuda",
+        "cudnn",
+        "dnn",
+        "dnn-cuda",
+        "ffmpeg"
+      ]
+    }
   ]
 }

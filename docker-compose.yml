@@ -60,7 +60,7 @@ services:
       - cluster.name=elasticsearch
       - xpack.security.enabled=false
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms4g -Xmx4g
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
     ulimits:
       nofile:
         soft: 65536

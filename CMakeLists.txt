@@ -3,27 +3,29 @@ project(KafkaLogProducer)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(OpenCV_ROOT "${VCPKG_INSTALLED_DIR}/x64-linux/share/opencv4")
+# include(${CMAKE_TOOLCHAIN_FILE})
 
 # 查找 librdkafka++
 find_package(PkgConfig REQUIRED)
-find_package(RdKafka CONFIG REQUIRED)
 
-find_package(librdkafka CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
+find_package(RdKafka CONFIG REQUIRED)
 find_package(eventpp CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(OpenCV REQUIRED)
 
 # 头文件路径
 include_directories(
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-    ${RDKAFKA_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/include
 )
 
 # nlohmann/json（单头文件库，可以直接下载到 include/）
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/src/include)
 
 # 源文件
-add_executable(kafka_producer main.cpp kafka_publish.hpp)
+file(GLOB_RECURSE SRCS ${CMAKE_SOURCE_DIR}/src/*.cpp ${CMAKE_SOURCE_DIR}/src/*.hpp)
+add_executable(kafka_producer ./src/main.cpp ${SRCS})
 
 # 链接库
 target_link_libraries(kafka_producer PRIVATE nlohmann_json::nlohmann_json)

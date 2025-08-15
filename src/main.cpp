@@ -1,4 +1,4 @@
-#include "kafka_publish.hpp"
+#include "watch/publisher/kafka_publisher.hpp"
 
 int main(int argc, char *argv[])
 {

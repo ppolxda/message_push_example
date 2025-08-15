@@ -82,6 +82,8 @@
         "strstream": "cpp",
         "future": "cpp",
         "shared_mutex": "cpp",
-        "cfenv": "cpp"
+        "cfenv": "cpp",
+        "*.inc": "cpp",
+        "*.txx": "cpp"
     }
 }

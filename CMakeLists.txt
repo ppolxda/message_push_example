@@ -3,7 +3,7 @@ project(KafkaLogProducer)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(OpenCV_ROOT "${VCPKG_INSTALLED_DIR}/x64-linux/share/opencv4")
+# set(OpenCV_ROOT "${VCPKG_INSTALLED_DIR}/x64-linux/share/opencv4")
 # include(${CMAKE_TOOLCHAIN_FILE})
 
 # 查找 librdkafka++
@@ -12,7 +12,7 @@ find_package(PkgConfig REQUIRED)
 find_package(RdKafka CONFIG REQUIRED)
 find_package(eventpp CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV CONFIG REQUIRED) 
 
 # 头文件路径
 include_directories(
@@ -35,3 +35,7 @@ target_link_libraries(kafka_producer PRIVATE eventpp::eventpp)
 # 如果你要确保静态链接
 # set_target_properties(kafka_producer PROPERTIES LINK_SEARCH_START_STATIC ON)
 # set_target_properties(kafka_producer PROPERTIES LINK_SEARCH_END_STATIC ON)
+
+# 添加测试子目录
+enable_testing()
+add_subdirectory(tests)

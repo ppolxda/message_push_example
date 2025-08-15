@@ -11,10 +11,8 @@ using EQ = eventpp::HeterEventQueue<
     int,
     eventpp::HeterTuple<
         void(int),
-        void(int),
         void(const cv::Mat &, const cv::Mat &),
         void(const cv::Point2f &, const cv::Point2f &),
-        void(const std::vector<cv::Point3f> &),
         void(const std::vector<cv::Point3f> &),
         void(const cv::Point3f &)>>;
 
@@ -71,34 +69,34 @@ public:
         thread.join();
     }
 
-    void addCallback(const std::shared_ptr<EventMessage> cb)
+    void addCallback(std::shared_ptr<EventMessage> cb)
     {
         events.push_back(cb);
-        queue.appendListener(EventType::MatchStart, [&cb]()
+        queue.appendListener(EventType::MatchStart, [cb](int)
                              { cb->matchStartCallback(); });
-        queue.appendListener(EventType::MatchEnd, [&cb]()
+        queue.appendListener(EventType::MatchEnd, [cb](int)
                              { cb->matchEndCallback(); });
-        queue.appendListener(EventType::CameraStream, [&cb](const cv::Mat &leftFrame, const cv::Mat &rightFrame)
+        queue.appendListener(EventType::CameraStream, [cb](const cv::Mat &leftFrame, const cv::Mat &rightFrame)
                              { cb->cameraStreamCallback(leftFrame, rightFrame); });
-        queue.appendListener(EventType::BallPosition, [&cb](const cv::Point2f &leftPos, const cv::Point2f &rightPos)
+        queue.appendListener(EventType::BallPosition, [cb](const cv::Point2f &leftPos, const cv::Point2f &rightPos)
                              { cb->ballPositionCallback(leftPos, rightPos); });
-        queue.appendListener(EventType::PredTrackBallPosition, [&cb](const std::vector<cv::Point3f> &pos)
+        queue.appendListener(EventType::PredTrackBallPosition, [cb](const std::vector<cv::Point3f> &pos)
                              { cb->predTrackBallPositionCallback(pos); });
-        queue.appendListener(EventType::RealTrackBallPosition, [&cb](const std::vector<cv::Point3f> &pos)
+        queue.appendListener(EventType::RealTrackBallPosition, [cb](const std::vector<cv::Point3f> &pos)
                              { cb->realTrackBallPositionCallback(pos); });
-        queue.appendListener(EventType::ShuttlecockPosition, [&cb](const cv::Point3f &pos)
+        queue.appendListener(EventType::ShuttlecockPosition, [cb](const cv::Point3f &pos)
                              { cb->shuttlecockPositionCallback(pos); });
     }
 
-    void emit(EventType type) const
+    void emit(EventType type)
     {
         if (type == EventType::MatchStart || type == EventType::MatchEnd)
-            queue.enqueue(type);
+            queue.enqueue(type, 0);
         else
             throw std::runtime_error("Invalid event type");
     }
 
-    void emit(EventType type, const cv::Mat &leftFrame, const cv::Mat &rightFrame) const
+    void emit(EventType type, const cv::Mat &leftFrame, const cv::Mat &rightFrame)
     {
         if (type == EventType::CameraStream)
             queue.enqueue(type, leftFrame, rightFrame);
@@ -106,22 +104,23 @@ public:
             throw std::runtime_error("Invalid event type");
     }
 
-    void emit(EventType type, const cv::Point2f &leftPos, const cv::Point2f &rightPos) const
+    void emit(EventType type, const cv::Point2f &leftPos, const cv::Point2f &rightPos)
     {
-        if (type == EventType::ShuttlecockPosition)
+        if (type == EventType::BallPosition)
             queue.enqueue(type, leftPos, rightPos);
         else
             throw std::runtime_error("Invalid event type");
     }
 
-    void emit(EventType type, const std::vector<cv::Point3f> &pos) const
+    void emit(EventType type, const std::vector<cv::Point3f> &pos)
     {
         if (type == EventType::PredTrackBallPosition || type == EventType::RealTrackBallPosition)
             queue.enqueue(type, pos);
         else
             throw std::runtime_error("Invalid event type");
     }
-    void emit(EventType type, const cv::Point3f &pos) const
+
+    void emit(EventType type, const cv::Point3f &pos)
     {
         if (type == EventType::ShuttlecockPosition)
             queue.enqueue(type, pos);
@@ -130,7 +129,7 @@ public:
     }
 
 private:
-    void run() const
+    void run()
     {
         while (running.load())
         {
@@ -150,7 +149,7 @@ private:
     EQ queue;
     std::thread thread;
     std::atomic<bool> running;
-    std::vector<const std::shared_ptr<EventMessage>> events;
+    std::vector<std::shared_ptr<EventMessage>> events;
 };
 
 // // 测试

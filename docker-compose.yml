@@ -1,0 +1,95 @@
+version: '3'
+services:
+  kafka:
+    container_name: kafka
+    image: apache/kafka:4.1.0-rc2
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      # 基础配置
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.50.3:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      # 存储位置
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # KRaft 元数据存储路径
+      KAFKA_METADATA_LOG_DIRS: /var/lib/kafka/meta
+      # 主题副本因子
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - kafka-meta:/var/lib/kafka/meta
+
+  kafka-ui:
+    container_name: kafka-ui
+    restart: always
+    image: kafbat/kafka-ui:40984bf
+    depends_on:
+      - kafka
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    # volumes:
+    #   - ./kui.yaml:/etc/kafkaui/dynamic_config.yaml:rw
+
+  logstash:
+    container_name: logstash
+    restart: always
+    image: logstash:9.1.2
+    depends_on:
+      - kafka
+      - elasticsearch
+    volumes:
+      - ./config/logstash.conf:/usr/share/logstash/config/logstash.conf
+      # - ./logstash/pipeline:/usr/share/logstash/pipeline
+    command: logstash -f /usr/share/logstash/config/logstash.conf
+    ports:
+      - "5044:5044"
+
+  elasticsearch:
+    image: elasticsearch:9.1.2
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - cluster.name=elasticsearch
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add: 
+      - IPC_LOCK
+    volumes:
+      - es-data-volume:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+  kibana:
+    container_name: kibana
+    image: kibana:9.1.2
+    restart: always
+    environment:
+      SERVER_NAME: kibana
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+volumes: 
+  es-data-volume:
+    driver: local
+  kafka-data:
+    driver: local
+  kafka-meta:
+    driver: local
+  apache-logs:
+    driver: local

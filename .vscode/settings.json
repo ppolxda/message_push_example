@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "/home/jzd/Desktop/Project/kafka-elk-docker-compose",
+    "cmake.sourceDirectory": "/home/ppolxda/message_push_example",
     "files.associations": {
         "*.proto": "proto3",
         "*.robot": "robot",

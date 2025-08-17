@@ -1,3 +1,4 @@
+
 #pragma once
 #include <iostream>
 #include <string>
@@ -5,20 +6,21 @@
 #include <random>
 #include <chrono>
 #include <thread>
-#include <csignal>
+#include <csignal>eeeeeee
 #include <librdkafka/rdkafkacpp.h>
 #include <nlohmann/json.hpp>
+#include "base_publisher.hpp"
 
-class KafkaLogProducer
+struct KafkaPublisherConfig
+{
+    std::string brokerHost;
+};
+
+class KafkaPublisher : public BasePublisher
 {
 public:
-    KafkaLogProducer(const std::string &broker, const std::string &topic)
-        : broker_(broker), topic_(topic), producer_(nullptr)
-    {
-        init();
-    }
-
-    ~KafkaLogProducer()
+    KafkaPublisher(KafkaPublisherConfig cfg) : producer_(nullptr), config_(cfg) {}
+    ~KafkaPublisher() override
     {
         if (producer_)
         {
@@ -27,83 +29,71 @@ public:
         }
     }
 
-    void sendLogBatches(int num_batches, int batch_size)
+    // Kafka不直接支持主题创建，通常由服务端自动创建或用admin client。这里只做占位实现。
+    bool create_topic(const std::string &topic, const std::map<std::string, std::string> &options = {}) override
     {
-        for (int i = 0; i < num_batches; ++i)
+        // 可集成librdkafka Admin API实现真正的主题创建，这里简单返回true
+        topic_ = topic;
+        return true;
+    }
+
+    bool publish(const std::string &topic, const std::string &message) override
+    {
+        if (!producer_)
+            return false;
+        RdKafka::ErrorCode resp = producer_->produce(
+            topic, RdKafka::Topic::PARTITION_UA,
+            RdKafka::Producer::RK_MSG_COPY,
+            const_cast<char *>(message.c_str()), message.size(),
+            nullptr, 0,
+            0, nullptr, nullptr);
+        if (resp != RdKafka::ERR_NO_ERROR)
         {
-            std::cout << "Sending batch " << (i + 1) << "/" << num_batches << std::endl;
-            for (int j = 0; j < batch_size; ++j)
+            std::cerr << "Produce failed: " << RdKafka::err2str(resp) << std::endl;
+            return false;
+        }
+        producer_->poll(0);
+        return true;
+    }
+
+private:
+    // config: {"bootstrap.servers": "host1:9092,host2:9092"}
+    bool connect(const std::map<std::string, std::string> &config)
+    {
+        std::string errstr;
+        RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
+        for (const auto &kv : config)
+        {
+            if (conf->set(kv.first, kv.second, errstr) != RdKafka::Conf::CONF_OK)
             {
-                auto log = generateLogMessage();
-                sendMessage(log.dump());
+                std::cerr << "Kafka config error: " << errstr << std::endl;
+                delete conf;
+                return false;
             }
-            producer_->flush(1000);
+        }
+        producer_ = RdKafka::Producer::create(conf, errstr);
+        if (!producer_)
+        {
+            std::cerr << "Failed to create producer: " << errstr << std::endl;
+            delete conf;
+            return false;
+        }
+        delete conf;
+        return true;
+    }
+
+    void disconnect()
+    {
+        if (producer_)
+        {
+            producer_->flush(5000);
+            delete producer_;
+            producer_ = nullptr;
         }
     }
 
 private:
-    std::string broker_;
-    std::string topic_;
     RdKafka::Producer *producer_;
-
-    void init()
-    {
-        std::string errstr;
-        RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
-
-        if (conf->set("bootstrap.servers", broker_, errstr) != RdKafka::Conf::CONF_OK)
-        {
-            throw std::runtime_error("Failed to set broker: " + errstr);
-        }
-
-        producer_ = RdKafka::Producer::create(conf, errstr);
-        if (!producer_)
-        {
-            throw std::runtime_error("Failed to create producer: " + errstr);
-        }
-
-        delete conf;
-    }
-
-    nlohmann::json generateLogMessage()
-    {
-        static std::vector<std::string> levels = {"INFO", "WARNING", "ERROR", "DEBUG"};
-        static std::vector<std::string> messages = {
-            "User login successful",
-            "User login failed",
-            "Database connection established",
-            "Database connection failed",
-            "Service started",
-            "Service stopped",
-            "Payment processed",
-            "Payment failed"};
-
-        static std::mt19937 rng(std::random_device{}());
-        std::uniform_int_distribution<int> level_dist(0, levels.size() - 1);
-        std::uniform_int_distribution<int> msg_dist(0, messages.size() - 1);
-
-        nlohmann::json log_entry;
-        log_entry["level"] = levels[level_dist(rng)];
-        log_entry["message"] = messages[msg_dist(rng)];
-        log_entry["timestamp"] = std::chrono::duration_cast<std::chrono::milliseconds>(
-                                     std::chrono::system_clock::now().time_since_epoch())
-                                     .count();
-
-        return log_entry;
-    }
-
-    void sendMessage(const std::string &payload)
-    {
-        RdKafka::ErrorCode resp = producer_->produce(
-            topic_, RdKafka::Topic::PARTITION_UA,
-            RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-            const_cast<char *>(payload.c_str()), payload.size(),
-            nullptr, 0,
-            0, nullptr, nullptr);
-
-        if (resp != RdKafka::ERR_NO_ERROR)
-        {
-            std::cerr << "Produce failed: " << RdKafka::err2str(resp) << std::endl;
-        }
-    }
+    KafkaPublisherConfig config_;
+    std::string topic_;
 };

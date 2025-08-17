@@ -156,28 +156,3 @@ private:
     std::vector<std::shared_ptr<EventMessage>> events;
     const int32_t thread_interval;
 };
-
-// // 测试
-// int main()
-// {
-//     EventManager manager;
-
-//     // 注册回调
-//     manager.on(EventType::MatchStart, []()
-//                { std::cout << "比赛开始!" << std::endl; });
-
-//     manager.on(EventType::CameraStream, [](const CameraFrame &frame)
-//                { std::cout << "收到摄像头数据: " << frame.width << "x" << frame.height << std::endl; });
-
-//     manager.on(EventType::ShuttlecockPosition, [](const ShuttlecockPosition &pos)
-//                { std::cout << "羽毛球位置: (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl; });
-
-//     // 触发事件
-//     manager.emit(EventType::MatchStart);
-//     CameraFrame frame{640, 480, {}};
-//     manager.emit(EventType::CameraStream, frame);
-//     ShuttlecockPosition pos{1.0f, 2.0f, 0.5f};
-//     manager.emit(EventType::ShuttlecockPosition, pos);
-
-//     return 0;
-// }

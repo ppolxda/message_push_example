@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
 
     try
     {
-        KafkaLogProducer producer(broker, topic);
-        producer.sendLogBatches(5, 10); // 5批，每批10条
+        // KafkaLogProducer producer(broker, topic);
+        // producer.sendLogBatches(5, 10); // 5批，每批10条
     }
     catch (const std::exception &ex)
     {

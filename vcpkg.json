@@ -1,18 +1,9 @@
 {
   "dependencies": [
-    "gtest",
     "eventpp",
+    "gtest",
     "librdkafka",
     "nlohmann-json",
-    {
-      "name": "opencv4",
-      "features": [
-        "cuda",
-        "cudnn",
-        "dnn",
-        "dnn-cuda",
-        "ffmpeg"
-      ]
-    }
+    "opencv4"
   ]
 }

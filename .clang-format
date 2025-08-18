@@ -1,0 +1,39 @@
+# LLVM  Google
+BasedOnStyle: Google
+# C标准定义
+Standard: c++11
+ShortNamespaceLines: 1
+
+# 是否将函数参数尽可能地放在同一行，紧凑显示。
+BinPackParameters: false
+# 函数调用参数不压缩到一行
+BinPackArguments: false
+# 函数名和第一个参数之间是否换行。
+BreakBeforeParameters: true
+# 函数名和末尾参数之间是否换行。
+BreakBeforeClosingBracket: true
+# 参数换行后是否对齐到括号位置
+# 可选值: Align, DontAlign, AlwaysBreak
+AlignAfterOpenBracket: AlwaysBreak
+
+# Attach(始终将大括号附加到周围的上下文)
+# Allman(总是在大括号前换行)
+# GNU(总是在大括号前换行，并对于控制语句的大括号增加额外的缩进)
+BreakBeforeBraces: Attach
+# 命名空间的缩进: None, Inner(缩进嵌套的命名空间中的内容), All
+NamespaceIndentation: Inner
+# 大括号换行 规则
+BraceWrapping:
+  AfterNamespace: false
+
+# 表示只有空函数允许写成一行，非空函数哪怕很短也不合并为一行。
+AllowShortFunctionsOnASingleLine: Empty
+
+# 最大长度
+ColumnLimit: 88
+# 允许所有参数整体换到下一行。
+AllowAllParametersOfDeclarationOnNextLine: true
+# 制表符宽度
+TabWidth: 2
+# 缩进设置
+IndentWidth: 2

@@ -1,4 +1,6 @@
-#include "watch/publisher/kafka_publisher.hpp"
+// #include "watch/publisher/kafka_publisher.hpp"
+#include <iostream>
+#include <string>
 
 int main(int argc, char *argv[])
 {

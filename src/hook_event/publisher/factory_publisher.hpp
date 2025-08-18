@@ -9,8 +9,8 @@
 class PublisherFactory
 {
 public:
-    static std::unique_ptr<KafkaPublisher> create(const KafkaPublisherConfig &config)
+    static std::shared_ptr<BasePublisher> createKafkaPublisher(const KafkaPublisherConfig &config)
     {
-        return std::make_unique<KafkaPublisher>(config);
+        return std::make_shared<KafkaPublisher>(config);
     }
 };

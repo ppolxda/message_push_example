@@ -1,5 +1,4 @@
 {
-    "cmake.sourceDirectory": "/home/ppolxda/message_push_example",
     "files.associations": {
         "*.proto": "proto3",
         "*.robot": "robot",

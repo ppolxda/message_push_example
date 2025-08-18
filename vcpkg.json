@@ -4,6 +4,6 @@
     "gtest",
     "librdkafka",
     "nlohmann-json",
-    "opencv4"
+    "aklomp-base64"
   ]
 }

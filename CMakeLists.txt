@@ -12,6 +12,7 @@ find_package(PkgConfig REQUIRED)
 find_package(RdKafka CONFIG REQUIRED)
 find_package(eventpp CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(base64 CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED) 
 
 # 头文件路径
@@ -20,17 +21,15 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/include
 )
 
-# nlohmann/json（单头文件库，可以直接下载到 include/）
-include_directories(${CMAKE_SOURCE_DIR}/src/include)
-
 # 源文件
-file(GLOB_RECURSE SRCS ${CMAKE_SOURCE_DIR}/src/*.cpp ${CMAKE_SOURCE_DIR}/src/*.hpp)
+file(GLOB_RECURSE SRCS ${CMAKE_SOURCE_DIR}/src/*.hpp)
 add_executable(kafka_producer ./src/main.cpp ${SRCS})
 
 # 链接库
 target_link_libraries(kafka_producer PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(kafka_producer PRIVATE RdKafka::rdkafka RdKafka::rdkafka++)
 target_link_libraries(kafka_producer PRIVATE eventpp::eventpp)
+target_link_libraries(kafka_producer PRIVATE aklomp::base64)
 
 # 如果你要确保静态链接
 # set_target_properties(kafka_producer PROPERTIES LINK_SEARCH_START_STATIC ON)

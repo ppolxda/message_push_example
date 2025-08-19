@@ -10,15 +10,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PkgConfig REQUIRED)
 
 find_package(RdKafka CONFIG REQUIRED)
-find_package(eventpp CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(base64 CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED) 
+# find_package(Boost REQUIRED)
+find_package(Boost CONFIG REQUIRED COMPONENTS filesystem system)
 
 # 头文件路径
 include_directories(
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/src/include
+    ${Boost_INCLUDE_DIRS}
 )
 
 # 源文件
@@ -28,8 +29,7 @@ add_executable(kafka_producer ./src/main.cpp ${SRCS})
 # 链接库
 target_link_libraries(kafka_producer PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(kafka_producer PRIVATE RdKafka::rdkafka RdKafka::rdkafka++)
-target_link_libraries(kafka_producer PRIVATE eventpp::eventpp)
-target_link_libraries(kafka_producer PRIVATE aklomp::base64)
+target_link_libraries(kafka_producer PRIVATE Boost::filesystem Boost::system)
 
 # 如果你要确保静态链接
 # set_target_properties(kafka_producer PROPERTIES LINK_SEARCH_START_STATIC ON)

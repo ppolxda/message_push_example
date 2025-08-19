@@ -37,13 +37,13 @@ TEST(EventManagerTest, MatchStartAndEndCallbacks) {
   manager.start();
   manager.emit(EnumEventType::MatchStart);
 
-  while (!manager.emptyQueue())
+  while (manager.poll() != 0)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   EXPECT_TRUE(msg->matchStartCalled);
   manager.emit(EnumEventType::MatchEnd);
 
-  while (!manager.emptyQueue())
+  while (manager.poll() != 0)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   EXPECT_TRUE(msg->matchEndCalled);
@@ -122,7 +122,7 @@ TEST(HookEventPublisherTest, KafkaEventFullTest) {
   // event.realTrackBallPositionCallback(pos);
   // event.shuttlecockPositionCallback(cv::Point3f(7, 8, 9));
 
-  while (!manager.emptyQueue())
+  while (manager.poll() != 0)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   manager.stop();

@@ -1,9 +1,7 @@
 {
   "dependencies": [
-    "eventpp",
     "gtest",
     "librdkafka",
-    "nlohmann-json",
-    "aklomp-base64"
+    "nlohmann-json"
   ]
 }

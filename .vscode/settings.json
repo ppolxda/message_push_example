@@ -83,6 +83,8 @@
         "shared_mutex": "cpp",
         "cfenv": "cpp",
         "*.inc": "cpp",
-        "*.txx": "cpp"
+        "*.txx": "cpp",
+        "coroutine": "cpp",
+        "source_location": "cpp"
     }
 }

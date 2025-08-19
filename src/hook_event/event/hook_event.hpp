@@ -1,8 +1,9 @@
 #pragma once
 
-#include <eventpp/hetereventqueue.h>
-#include <libbase64.h>
-
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/ostream_iterator.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
@@ -12,6 +13,25 @@
 
 #include "../publisher/base_publisher.hpp"
 #include "base_event.hpp"
+
+std::string encode_base64(const std::vector<unsigned char> &input) {
+  using namespace boost::archive::iterators;
+  using base64_enc_iterator = base64_from_binary<
+      transform_width<std::vector<unsigned char>::const_iterator, 6, 8>>;
+
+  std::stringstream os;
+  std::copy(
+      base64_enc_iterator(input.begin()),
+      base64_enc_iterator(input.end()),
+      std::ostream_iterator<char>(os));
+
+  // Add padding if needed
+  size_t num_pad = (3 - input.size() % 3) % 3;
+  for (size_t i = 0; i < num_pad; ++i) {
+    os.put('=');
+  }
+  return os.str();
+}
 
 class HookEventPublisher : public EventMessage {
  public:
@@ -23,7 +43,7 @@ class HookEventPublisher : public EventMessage {
         frame_id_(0),
         publisher_(publisher),
         topic_(topic),
-        topic_image_(topic_image_) {}
+        topic_image_(topic_image) {}
 
   void matchStartCallback() override {
     nlohmann::json msg = {
@@ -53,13 +73,7 @@ class HookEventPublisher : public EventMessage {
       std::vector<unsigned char> buf;
       cv::imencode(".png", frame, buf);
       size_t outlen = 4 * ((buf.size() + 2) / 3);
-      std::string encoded(outlen, '\0');
-      base64_encode(
-          reinterpret_cast<const char *>(buf.data()),
-          buf.size(),
-          &encoded[0],
-          &outlen,
-          0);
+      std::string encoded = encode_base64(buf);
       assert(!encoded.empty());
 
       // 推送内容

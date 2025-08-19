@@ -6,6 +6,8 @@
 #include "base_publisher.hpp"
 #include "kafka_publisher.hpp"
 
+namespace hook_event::publisher {
+
 // KafkaPublisher 工厂
 class PublisherFactory {
  public:
@@ -14,3 +16,5 @@ class PublisherFactory {
     return std::make_shared<KafkaPublisher>(config);
   }
 };
+
+};  // namespace hook_event::publisher

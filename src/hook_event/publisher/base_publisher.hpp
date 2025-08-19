@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 
+namespace hook_event::publisher {
+
 class BasePublisher {
  public:
   virtual ~BasePublisher() = default;
@@ -23,3 +25,5 @@ class BasePublisher {
       const std::string &topic,
       const std::map<std::string, std::string> &options = {}) = 0;
 };
+
+};  // namespace hook_event::publisher

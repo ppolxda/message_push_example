@@ -7,8 +7,13 @@
 #include <string>
 
 #include "hook_event/event/base_event.hpp"
-#include "hook_event/event/hook_event.hpp"
+#include "hook_event/event/hook_event_publisher.hpp"
+#include "hook_event/hook_event.hpp"
 #include "hook_event/publisher/factory_publisher.hpp"
+
+using namespace hook_event;
+using namespace hook_event::event;
+using namespace hook_event::publisher;
 
 std::string getCurrentDir() {
   char buf[PATH_MAX];
@@ -126,4 +131,30 @@ TEST(HookEventPublisherTest, KafkaEventFullTest) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   manager.stop();
+}
+
+TEST(HookEventPublisherTest, KafkaHookEventTest) {
+  auto hook = HookEvent::getInstance("localhost:9092");
+
+  std::string pwd = getCurrentDir();
+  cv::Mat imga = cv::imread(pwd + "/../../tests/data/00000.png");
+  EXPECT_TRUE(!imga.empty() and imga.cols > 0 and imga.rows > 0);
+  cv::Mat imgb = cv::imread(pwd + "/../../tests/data/00001.png");
+  EXPECT_TRUE(!imgb.empty() and imgb.cols > 0 and imgb.rows > 0);
+
+  hook.getManager().emit(EnumEventType::MatchStart);
+  hook.getManager().emit(EnumEventType::CameraStream, imga, imgb);
+  hook.getManager().emit(
+      EnumEventType::BallPosition, cv::Point2f(1, 2), cv::Point2f(3, 4));
+  hook.getManager().emit(EnumEventType::MatchEnd);
+
+  // std::vector<cv::Point3f> pos = {{1, 2, 3}, {4, 5, 6}};
+  // event.predTrackBallPositionCallback(pos);
+  // event.realTrackBallPositionCallback(pos);
+  // event.shuttlecockPositionCallback(cv::Point3f(7, 8, 9));
+
+  while (hook.getManager().poll() != 0)
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+  hook.getManager().stop();
 }

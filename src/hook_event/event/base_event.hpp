@@ -8,6 +8,10 @@
 #include <thread>
 #include <vector>
 
+using namespace boost;
+
+namespace hook_event::event {
+
 // 定义事件类型
 enum EnumEventType {
   MatchStart = 0,         /// 比赛开始
@@ -130,19 +134,20 @@ class EventManager {
   }
 
  private:
-  boost::asio::io_context io_context_;
-  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard_;
+  asio::io_context io_context_;
+  asio::executor_work_guard<asio::io_context::executor_type> work_guard_;
   std::thread thread_;
   std::atomic<bool> running_;
   std::vector<std::shared_ptr<EventMessage>> callbacks_;
 
   // 信号定义
-  boost::signals2::signal<void()> matchStartSignal_;
-  boost::signals2::signal<void()> matchEndSignal_;
-  boost::signals2::signal<void(const cv::Mat &, const cv::Mat &)> cameraStreamSignal_;
-  boost::signals2::signal<void(const cv::Point2f &, const cv::Point2f &)>
-      ballPositionSignal_;
-  boost::signals2::signal<void(const std::vector<cv::Point3f> &)> predTrackBallSignal_;
-  boost::signals2::signal<void(const std::vector<cv::Point3f> &)> realTrackBallSignal_;
-  boost::signals2::signal<void(const cv::Point3f &)> shuttlecockSignal_;
+  signals2::signal<void()> matchStartSignal_;
+  signals2::signal<void()> matchEndSignal_;
+  signals2::signal<void(const cv::Mat &, const cv::Mat &)> cameraStreamSignal_;
+  signals2::signal<void(const cv::Point2f &, const cv::Point2f &)> ballPositionSignal_;
+  signals2::signal<void(const std::vector<cv::Point3f> &)> predTrackBallSignal_;
+  signals2::signal<void(const std::vector<cv::Point3f> &)> realTrackBallSignal_;
+  signals2::signal<void(const cv::Point3f &)> shuttlecockSignal_;
 };
+
+};  // namespace hook_event::event

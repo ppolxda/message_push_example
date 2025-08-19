@@ -4,6 +4,9 @@
 
 #include "hook_event/publisher/factory_publisher.hpp"
 
+// using namespace hook_event::event;
+using namespace hook_event::publisher;
+
 long long getCurrentTimestampMs() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(
              std::chrono::system_clock::now().time_since_epoch())

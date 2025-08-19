@@ -8,6 +8,8 @@
 
 #include "base_publisher.hpp"
 
+namespace hook_event::publisher {
+
 struct KafkaPublisherConfig {
   // client config
   std::string bootstrapServers = "localhost:9092";
@@ -161,3 +163,5 @@ class KafkaPublisher : public BasePublisher {
   KafkaPublisherConfig config_;
   std::string topic_;
 };
+
+};  // namespace hook_event::publisher
